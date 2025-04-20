@@ -15,9 +15,14 @@ This is the official repository of **EMOPIA: A Multi-Modal Pop Piano Dataset For
 
 `2021-07-20` Upload all pretrained [weight](https://drive.google.com/file/d/1L_NOVKCElwcYUEAKp1-FZj_G6Hcq2g2c/view?usp=sharing)
 
-<figure><img src="figs/results.png">
+<figure><img src="figs/results.png"></figure>
 
 you can check ML performance in [notebook](https://github.com/Dohppak/EMOPIA_cls/blob/main/notebook/1.ML%20Classifier.ipynb)
+
+`2025-04-19` Docker image and container:
+- As the repo was last updated around 4 years ago, many modules/libraries may not or not at least by default be available.
+And may not be able to build with default settings in latest environment. So I start to take time to build a Docker environment to people's time who want to try out and it won't impact the host environment like Cuda/Cudnn environment.
+- Please see README.md and other files in Docker folder.
 
 ## Environment
 

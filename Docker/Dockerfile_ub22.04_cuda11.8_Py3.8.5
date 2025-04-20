@@ -1,0 +1,67 @@
+# -runtime- image (12.6G): includes cuDNN, is available.
+# -devel-   image    (6G): includes headers, development tools for building CUDA images, particularly useful for multi-stage builds.
+FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+
+# pre-set timezone to LA to avoid prompt in build process
+ENV DEBIAN_FRONTEND noninteractive
+ENV TZ Etc/UTC
+
+# Install necessary libraries and tools
+RUN apt-get update && apt-get install -y \
+    wget \
+    curl \
+    software-properties-common \
+    libxext-dev \
+    libxrender-dev \
+    libxtst-dev \
+    libfreetype6 \
+    libfontconfig1 \
+    xauth \
+    xvfb \
+    apt-transport-https \
+    ca-certificates \
+    gnupg
+
+# install python 3.8.5
+RUN apt update
+RUN apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev \
+          libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev
+
+RUN echo ====== Starting building Python-3.8.5 ======
+# to be used by Python rebuilt from source below
+# Adjust 8 to 32 - the number of cores in your machine
+RUN apt install -y xz-utils liblzma-dev && \
+    wget https://www.python.org/ftp/python/3.8.5/Python-3.8.5.tgz && \
+    tar -xf Python-3.8.5.tgz && \
+    cd Python-3.8.5 && \
+    ./configure --enable-optimizations && \
+    make -j 32 && \
+    make altinstall
+RUN echo ====== Done with building Python-3.8.5 ======
+
+# Install TensorFlow and PyTorch
+#RUN pip install tensorflow==2.11.0 && \
+#    pip install torch==1.13.0+cu116 torchvision==0.14.0+cu116 torchaudio==0.13.0+cu116 -f https://download.pytorch.org/whl/cu116/torch_stable.html
+
+RUN mkdir -p ~/.ssh; touch ~/.ssh/authorized_keys; chmod -Rf og-w ~/.ssh/; chmod og-w ~/.; touch ~/.inputrc; echo "\"\e[A\": history-search-backward" >>  ~/.inputrc; echo "\"\e[B\": history-search-forward" >>  ~/.inputrc;  >> ~/.bash_profile
+
+# Download and install PyCharm Community Edition
+RUN wget https://download.jetbrains.com/python/pycharm-community-2024.3.tar.gz -O /tmp/pycharm.tar.gz && \
+    tar -xzf /tmp/pycharm.tar.gz -C /opt/ && \
+    rm /tmp/pycharm.tar.gz
+# Set environment variables
+ENV PYCHARM_HOME /opt/pycharm-community-2024.3/bin
+# Add PyCharm to the PATH
+ENV PATH $PYCHARM_HOME:$PATH
+
+# Optional: Clean up to reduce image size
+RUN apt-get autoremove -y && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Set a working directory (optional)
+# WORKDIR /workspace
+
+# Ensure the container does not exit immediately
+# CMD ["sleep", "infinity"]
+# Entry point (optional)
+CMD ["bash"]
+
